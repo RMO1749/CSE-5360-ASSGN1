@@ -1,5 +1,5 @@
 #Name: Richard Olu Jordan
-#Class: CSE 5315
+#Class: CSE 5360
 #Homework: Artificial Intelligence - Search Algorithms
 
 import sys 
@@ -109,23 +109,24 @@ def calculate_cost(graph, source_node_name, dest_node_name):
     return None
 
 def aStar(heuristic_graph, graph, start_node, goal_node):
-    f_value = heuristic_graph[start_node].heuristic #fvalue is the heuristic
-    g_value = 0 #represents the cum cost
+    g_value = 0 
+    f_value = 0
     closed_set = set() 
     
     priority_queue = [(f_value, g_value, start_node)]
 
-    g_value_dict = {start_node: 0} 
+    g_value_optimiz = {start_node: 0}
+   
 
     parents_map = {start_node: None} # currently has no parents meaning root node
     nodes_popped_counter = 0
     nodes_expanded_counter = 0
-    node_generated_counter = 0
+    node_generated_counter = 1
+
 
 
     while priority_queue:
-        current_f, current_g, current_node = heapq.heappop(priority_queue)
-
+        f_value, current_g, current_node = heapq.heappop(priority_queue)
         nodes_popped_counter += 1
 
         if current_node == goal_node:
@@ -136,32 +137,31 @@ def aStar(heuristic_graph, graph, start_node, goal_node):
             nodes_expanded_counter += 1 
         
         for edge in graph[current_node].edges: 
-             #all edges of the current node
+            node_generated_counter += 1      
             next_node = edge.destination.name
             next_g = edge.weight + current_g
-            next_f = current_f + heuristic_graph[next_node].heuristic
+            next_f = next_g + heuristic_graph[next_node].heuristic
 
-            #if next_node not in visited or found a cheaper path
-            if next_node not in g_value_dict or next_g < g_value_dict[next_node]:
-                g_value_dict[next_node] = next_g #update the cost
-                heapq.heappush(priority_queue, (next_f, next_g, next_node))
-                node_generated_counter += 1
+                                
+            if next_node not in g_value_optimiz or next_g < g_value_optimiz[next_node]:            
+                g_value_optimiz[next_node] = next_g 
                 parents_map[next_node] = current_node
-    
+                heapq.heappush(priority_queue, (next_f, next_g, next_node))
 
     return [], nodes_popped_counter,nodes_expanded_counter, node_generated_counter, -1
         
 
 def ucs(graph, start_node, goal_node):
-    priority_queue = [(0, start_node)]  # current cost and start node
-    cum_cost_dict = {start_node: 0}
+    priority_queue = [(0, start_node)]
+    cum_cost_optimized_list = {start_node: 0}  # current cost and start node
+    cum_cost_non_optimized_list = {start_node: [0]}
     closed_set = set()  # Tracks nodes that have been expanded
 
     parents_map = {start_node: None} #will be used to reconstruct path
     nodes_popped_counter = 0
     nodes_expanded_counter = 0
-    node_generated_counter = 0
-
+    node_generated_counter = 1
+        
     while priority_queue:
         current_cost, current_node = heapq.heappop(priority_queue)
         nodes_popped_counter += 1  # Increment because a node is popped
@@ -171,18 +171,27 @@ def ucs(graph, start_node, goal_node):
 
         # Increment nodes expanded only if the node is being expanded for the first time
         if current_node not in closed_set:
-            closed_set.add(current_node)
-            nodes_expanded_counter += 1  # Increment because a node is expanded
-
+            closed_set.add(current_node)    
+            nodes_expanded_counter += 1  
+           
             for edge in graph[current_node].edges:
+                node_generated_counter += 1
                 next_node = edge.destination.name
                 cum_next_cost = current_cost + edge.weight
 
-                if next_node not in cum_cost_dict or cum_next_cost < cum_cost_dict[next_node]:
-                    cum_cost_dict[next_node] = cum_next_cost
-                    heapq.heappush(priority_queue, (cum_next_cost, next_node))
-                    node_generated_counter += 1  # Increment for each node generated
+                if next_node not in cum_cost_optimized_list or cum_next_cost < cum_cost_optimized_list[next_node]:
+                      # Increment here for each consideration for optimized paths
+                    
+                    cum_cost_optimized_list[next_node] = cum_next_cost
                     parents_map[next_node] = current_node
+
+                if next_node not in cum_cost_non_optimized_list:
+                    cum_cost_non_optimized_list[next_node] = [cum_next_cost]
+                else:
+                    cum_cost_non_optimized_list[next_node].append(cum_next_cost)  
+                
+                heapq.heappush(priority_queue, (cum_next_cost, next_node))
+
 
     return [], nodes_popped_counter, nodes_expanded_counter, node_generated_counter, -1  # If goal not reached
 
