@@ -9,13 +9,16 @@ Assignment: Artificial Intelligence - Search Algorithms
 **Introduction**
 This project implements two fundamental search algorithms in Artificial Intelligence: Uniform Cost Search (UCS) and A* Search. Designed to navigate through a graph of cities connected by weighted edges, it finds the shortest path between two given cities. The program is written in Python and showcases object-oriented programming practices with classes representing Nodes (cities), Edges (connections between cities), and Heuristics (estimated distances to the goal).
 
+**Optimizations**
+Please note with A* algorithm an optimization was applied and hence the expected value for number of nodes popped may be greater than the value our algorithm calculates. Please refer to the side note in the A* algorithm referenced below. 
+
 **Programming Language**
 Python.
 
 **Data Structures**
 
 **Classes**
-Node Class: Represents a city in the graph. It includes methods to add edges (addEdge) and heuristic values (addHeuristic), enabling the construction of a graph with weighted edges and heuristic information for A* search.
+Node Class: Represents a city in the graph. It includes methods to add edges (addEdge) and heuristic values (addHeuristic), enabling the construction of a graph with weighted edges as well as heuristic information for A* search.
 
 Edge Class: Models a directed edge in the graph with attributes for the source node, destination node, and the weight of the edge, representing the distance or cost between two cities.
 
@@ -24,7 +27,7 @@ Heuristic Class: Stores heuristic values associated with nodes, aiding in the im
 **Functions**
 parse_input(filename): Reads an input file to construct the graph based on a list of edges. It formats the input to create nodes and edges, facilitating the search algorithms.
 
-addHeuristic(filename, graph): Parses a file containing heuristic values for nodes and updates the graph with these values, preparing it for the A* search.
+addHeuristic(filename, graph): Parses a file containing heuristic values for nodes and updates the graph with these values. The purpose of this function is to prepare the graph for the A* search. 
 
 print_fn(graph, nodes_popped, nodes_expanded_counter, nodes_generated, cost, path): Outputs the results of the search, including the path taken, the total cost, and statistics on nodes processed during the search.
 
@@ -49,8 +52,10 @@ _A* Search Example:_
 python find_route.py input1.txt Bremen London heuristic1.txt
 This variant includes a heuristic file, enabling the A* search algorithm to find the shortest path considering both the actual travel cost and the estimated distance to the goal.
 
+Optimizations: In enhancing the efficiency of the A* algorithm, an optimization was employed to manage the handling of nodes within the search. Specifically, before adding a new node to the priority queue (fringe), the algorithm checks two conditions: if the node is not already present in the queue, or if a more cost-effective path to this node has been identified. This strategy ensures that the algorithm does not handle instances of the same node with varying costs. As a consequence, it eliminates the scenario where a node is removed from the queue only to find out it has already been evaluated and is present in the closed set.
+
 **Conclusion**
-This project provides a practical application of UCS and A* search algorithms, demonstrating their utility in solving real-world routing problems. By adjusting the input files and heuristics, users can explore different graph configurations and see how these algorithms perform in various scenarios.
+This project provides a practical application of UCS and A* search algorithms, demonstrating their utility in solving real-world routing problems. By adjusting the input files and heuristic file, we can explore different graph configurations and see how these algorithms perform in various scenarios.
 
 
 

@@ -100,7 +100,7 @@ def print_fn(graph, nodes_popped,nodes_expanded_counter, nodes_generated, cost, 
             weight = calculate_cost(graph, path[i], path[i + 1] )
             print(path[i], "to", path[i + 1], ",", weight, "km")
 
-
+#this function calculates the cost between two nodes   
 def calculate_cost(graph, source_node_name, dest_node_name):
     if source_node_name in graph:
         for edge in graph[source_node_name].edges:
@@ -115,17 +115,15 @@ def aStar(heuristic_graph, graph, start_node, goal_node):
     
     priority_queue = [(f_value, g_value, start_node)]
 
-    g_value_optimiz = {start_node: 0}
+    cum_g_value = {start_node: 0}
    
 
     parents_map = {start_node: None} # currently has no parents meaning root node
     nodes_popped_counter = 0
     nodes_expanded_counter = 0
-    node_generated_counter = 1
+    node_generated_counter = 1 #we start at one because start node already counts as being generated
 
-
-
-    while priority_queue:
+    while priority_queue: #means while priority_queue is not empty
         f_value, current_g, current_node = heapq.heappop(priority_queue)
         nodes_popped_counter += 1
 
@@ -141,10 +139,9 @@ def aStar(heuristic_graph, graph, start_node, goal_node):
             next_node = edge.destination.name
             next_g = edge.weight + current_g
             next_f = next_g + heuristic_graph[next_node].heuristic
-
                                 
-            if next_node not in g_value_optimiz or next_g < g_value_optimiz[next_node]:            
-                g_value_optimiz[next_node] = next_g 
+            if next_node not in cum_g_value or next_g < cum_g_value[next_node]:            
+                cum_g_value[next_node] = next_g 
                 parents_map[next_node] = current_node
                 heapq.heappush(priority_queue, (next_f, next_g, next_node))
 
@@ -153,6 +150,14 @@ def aStar(heuristic_graph, graph, start_node, goal_node):
 
 def ucs(graph, start_node, goal_node):
     priority_queue = [(0, start_node)]
+    
+    ''' Optimized List: This list ensures efficiency by only adding nodes that meet one of two criteria: (a) the node is not already in the list,
+      or (b) the node offers a lower cumulative cost than previously recorded versions. This approach minimizes the number of nodes added to the fringe,
+        reducing the overall count of nodes we need to process, thereby lowering the nodes_popped counter.
+        Non-Optimized List (Dictionary with Lists as Values): Contrary to the optimized approach, this version records 
+        every node added to the fringe, regardless of whether it's already present, and irrespective of its cumulative cost being
+        lower or higher. As a result, this method increases the nodes_popped count because it leads to processing multiple 
+        instances of the same node, each with varying cumulative costs, including those already evaluated and placed in the closed set. ''' 
     cum_cost_optimized_list = {start_node: 0}  # current cost and start node
     cum_cost_non_optimized_list = {start_node: [0]}
     closed_set = set()  # Tracks nodes that have been expanded
@@ -181,10 +186,11 @@ def ucs(graph, start_node, goal_node):
 
                 if next_node not in cum_cost_optimized_list or cum_next_cost < cum_cost_optimized_list[next_node]:
                       # Increment here for each consideration for optimized paths
-                    
                     cum_cost_optimized_list[next_node] = cum_next_cost
                     parents_map[next_node] = current_node
 
+                # in this optimization, we keep track of all the nodes pushed onto the fringe by using a dictionary with node names
+                # as its keys and a lists of cum_costs as its values.
                 if next_node not in cum_cost_non_optimized_list:
                     cum_cost_non_optimized_list[next_node] = [cum_next_cost]
                 else:
@@ -215,6 +221,7 @@ def main():
         graph = parse_input(input_filename)
         path, nodes_popped, nodes_expanded_counter, nodes_generated, cost = ucs(graph, startNode, endNode)
         print_fn(graph, nodes_popped, nodes_expanded_counter, nodes_generated, cost, path)
+   
     elif len(sys.argv) == 5:
         # Filename, startNode, endNode, and heuristic_filename provided: run A* search
         input_filename = sys.argv[1]
